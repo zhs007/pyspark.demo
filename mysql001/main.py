@@ -17,3 +17,4 @@ jdbcDf = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
 # jdbcDf.write().saveAsTable('gamelog6_api_200227')                                       
 print("mysql", jdbcDf.printSchema())
 print("mysql count", jdbcDf.count())
+jdbcDf.write().saveAsTable(name='gamelog6_api_200227', mode='overwrite')
