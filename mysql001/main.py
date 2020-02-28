@@ -14,6 +14,8 @@ jdbcDf = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
                                        dbtable="(SELECT * FROM gamelog6_api_200227 WHERE curtime >= '2020-02-27') tmp",
                                        user=cfg['mysql']['user'],
                                        password=cfg['mysql']['password']).load()
-jdbcDf.write.saveAsTable(name='gamelog6_api_200227', mode='overwrite')
+# jdbcDf.write.saveAsTable(name='gamelog6_api_200227', mode='overwrite')
 print("mysql", jdbcDf.printSchema())
 print("mysql count", jdbcDf.count())
+
+jdbcDf.write.parquet("output/gamelog6_api_200227.parquet")
