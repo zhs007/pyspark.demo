@@ -75,12 +75,11 @@ lstrr = [float(dfstart.count()) / float(dfstart.count())]
 lstusers = [dfstart.count()]
 
 while dts < dte:
-    if dayoff >= 29:
-        df = loadUsersInDay(ctx, cfg, dts)
-        cdf = dfstart.subtract(df)
-        lstrr.append((float(dfstart.count()) - float(cdf.count())
-                      ) / float(dfstart.count()))
-        lstusers.append(df.count())
+    df = loadUsersInDay(ctx, cfg, dts)
+    cdf = dfstart.subtract(df)
+    lstrr.append((float(dfstart.count()) - float(cdf.count())) /
+                 float(dfstart.count()))
+    lstusers.append(df.count())
 
     dts = dts + timedelta(days=1)
     dayoff = dayoff + 1
