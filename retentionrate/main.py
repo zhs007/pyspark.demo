@@ -3,6 +3,8 @@
 import sys
 import yaml
 from datetime import datetime, timedelta
+import numpy as np
+import pandas as pd
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
 
@@ -58,34 +60,85 @@ def loadUsersInDay(ctx, cfg, daytime):
     return df1
 
 
+def countRetentionRate(dfdict, daytime, enddaytime):
+    """统计留存率
+    """
+    if not isinstance(daytime, (datetime)):
+        raise TypeError('countRetentionRate: daytime is not a datetime.')
+    if not isinstance(enddaytime, (datetime)):
+        raise TypeError('countRetentionRate: enddaytime is not a datetime.')
+
+    curkey = daytime.strftime("%y%m%d")
+    lstrr = [1.0]
+    daytime = daytime + timedelta(days=1)
+    curdf = dfdict.get(curkey)
+    if curdf == None:
+        return lstrr
+
+    while daytime < enddaytime:
+        cdtstr = daytime.strftime("%y%m%d")
+        cdf = dfdict.get(cdtstr)
+        if cdf == None:
+            return lstrr
+
+        cdf = curdf.subtract(cdf)
+        lstrr.append((float(curdf.count()) - float(cdf.count())
+                      ) / float(curdf.count()))
+
+        daytime = daytime + timedelta(days=1)
+
+    return lstrr
+
+
 f = open('config.yaml')
 cfg = yaml.load(f)
 
 sc = SparkContext("local", "retention rate app")
 ctx = SQLContext(sc)
 
+startdt = datetime(2020, 1, 1)
+enddt = datetime(2020, 2, 28)
 
-dts = datetime(2020, 1, 1)
-dte = datetime(2020, 2, 28)
+dts = startdt
 dayoff = 0
+dfdict = {}
+lstusers = []
 
-dfstart = loadUsersInDay(ctx, cfg, dts)
-dts = dts + timedelta(days=1)
-lstrr = [float(dfstart.count()) / float(dfstart.count())]
-lstusers = [dfstart.count()]
+# dfstart = loadUsersInDay(ctx, cfg, dts)
+# dts = dts + timedelta(days=1)
+# lstrr = [float(dfstart.count()) / float(dfstart.count())]
+# lstusers = [dfstart.count()]
 
-while dts < dte:
+while dts < enddt:
     df = loadUsersInDay(ctx, cfg, dts)
-    cdf = dfstart.subtract(df)
-    lstrr.append((float(dfstart.count()) - float(cdf.count())) /
-                 float(dfstart.count()))
-    lstusers.append(df.count())
+    cdtstr = dts.strftime("%y%m%d")
+    dfdict[cdtstr] = df
 
     dts = dts + timedelta(days=1)
     dayoff = dayoff + 1
 
-    if dayoff > 30:
-        break
+    # if dayoff > 30:
+    #     break
 
-print("retention rate is ", lstrr)
+dts = startdt
+rrdict = {}
+maxlen = 0
+
+while dts < enddt:
+    curlst = countRetentionRate(dfdict, dts, enddt)
+    cdtstr = dts.strftime("%y%m%d")
+    if maxlen < len(curlst):
+        maxlen = len(curlst)
+
+    if len(curlst) < maxlen:
+        for i in range(maxlen - len(curlst)):
+            curlst.append(np.nan)
+
+    rrdict[cdtstr] = curlst
+
+    dts = dts + timedelta(days=1)
+
+rrdf = pd.DataFrame(rrdict)
+
+print("retention rate is ", rrdf)
 print("users is ", lstusers)
