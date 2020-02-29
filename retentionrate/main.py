@@ -79,7 +79,7 @@ while dts < dte:
         df = loadUsersInDay(ctx, cfg, dts)
         cdf = dfstart.subtract(df)
         lstrr.append(float(cdf.count()) / float(dfstart.count()))
-        lstusers.append(cdf.count())
+        lstusers.append(df.count())
 
     dts = dts + timedelta(days=1)
     dayoff = dayoff + 1
