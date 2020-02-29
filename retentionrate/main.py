@@ -52,8 +52,8 @@ def loadUsersInDay(ctx, cfg, daytime):
     print("loadUsersInDay %s total count is %d" %
           (daytime.strftime("%Y-%m-%d"), df1.count()))
 
-    df1.write.parquet("output/usersinday_%s.parquet" %
-                      daytime.strftime("%y%m%d"))
+    # df1.write.parquet("output/usersinday_%s.parquet" %
+    #                   daytime.strftime("%y%m%d"))
 
     return df1
 
@@ -67,7 +67,20 @@ ctx = SQLContext(sc)
 
 dts = datetime(2020, 1, 1)
 dte = datetime(2020, 2, 28)
+dayoff = 0
+
+dfstart = loadUsersInDay(ctx, cfg, dts)
+dts = dts + timedelta(days=1)
+lst = [dfstart.count()/dfstart.count()]
 
 while dts < dte:
     df = loadUsersInDay(ctx, cfg, dts)
+    cdf = dfstart.subtract(df)
+    lst.append(cdf.count()/dfstart.count())
     dts = dts + timedelta(days=1)
+    dayoff = dayoff + 1
+
+    if dayoff > 30:
+        break
+
+print("retention rate is ", lst)
