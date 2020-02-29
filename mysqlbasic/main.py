@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 import sys
 import yaml
 from pyspark import SparkContext
@@ -10,22 +12,22 @@ sc = SparkContext("local", "mysql app")
 ctx = SQLContext(sc)
 
 df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
-                                       driver="com.mysql.jdbc.Driver",
-                                       dbtable="(SELECT distinct(uid) as uid FROM gamelog6_api_200227 WHERE curtime >= '2020-02-27') tmp",
-                                       user=cfg['mysql']['user'],
-                                       password=cfg['mysql']['password']).load()
+                                      driver="com.mysql.jdbc.Driver",
+                                      dbtable="(SELECT distinct(uid) as uid FROM gamelog6_api_200227 WHERE curtime >= '2020-02-27') tmp",
+                                      user=cfg['mysql']['user'],
+                                      password=cfg['mysql']['password']).load()
 
 df2 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
-                                       driver="com.mysql.jdbc.Driver",
-                                       dbtable="(SELECT distinct(uid) as uid FROM gamelog6_api_200226 WHERE curtime >= '2020-02-27') tmp",
-                                       user=cfg['mysql']['user'],
-                                       password=cfg['mysql']['password']).load()
+                                      driver="com.mysql.jdbc.Driver",
+                                      dbtable="(SELECT distinct(uid) as uid FROM gamelog6_api_200226 WHERE curtime >= '2020-02-27') tmp",
+                                      user=cfg['mysql']['user'],
+                                      password=cfg['mysql']['password']).load()
 
 df3 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
-                                       driver="com.mysql.jdbc.Driver",
-                                       dbtable="(SELECT distinct(uid) as uid FROM gamelog6_api_200228 WHERE curtime < '2020-02-28') tmp",
-                                       user=cfg['mysql']['user'],
-                                       password=cfg['mysql']['password']).load()                                       
+                                      driver="com.mysql.jdbc.Driver",
+                                      dbtable="(SELECT distinct(uid) as uid FROM gamelog6_api_200228 WHERE curtime < '2020-02-28') tmp",
+                                      user=cfg['mysql']['user'],
+                                      password=cfg['mysql']['password']).load()
 
 # jdbcDf.write.saveAsTable(name='gamelog6_api_200227', mode='overwrite')
 print("mysql", df1.printSchema())
