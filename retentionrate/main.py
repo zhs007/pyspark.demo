@@ -71,12 +71,12 @@ dayoff = 0
 
 dfstart = loadUsersInDay(ctx, cfg, dts)
 dts = dts + timedelta(days=1)
-lst = [dfstart.count()/dfstart.count()]
+lst = [float(dfstart.count()) / float(dfstart.count())]
 
 while dts < dte:
     df = loadUsersInDay(ctx, cfg, dts)
     cdf = dfstart.subtract(df)
-    lst.append(cdf.count()/dfstart.count())
+    lst.append(float(cdf.count()) / float(dfstart.count()))
     dts = dts + timedelta(days=1)
     dayoff = dayoff + 1
 
