@@ -71,16 +71,20 @@ dayoff = 0
 
 dfstart = loadUsersInDay(ctx, cfg, dts)
 dts = dts + timedelta(days=1)
-lst = [float(dfstart.count()) / float(dfstart.count())]
+lstrr = [float(dfstart.count()) / float(dfstart.count())]
+lstusers = [dfstart.count()]
 
 while dts < dte:
     df = loadUsersInDay(ctx, cfg, dts)
     cdf = dfstart.subtract(df)
-    lst.append(float(cdf.count()) / float(dfstart.count()))
+    lstrr.append(float(cdf.count()) / float(dfstart.count()))
+    lstusers.append(cdf.count())
+
     dts = dts + timedelta(days=1)
     dayoff = dayoff + 1
 
     if dayoff > 30:
         break
 
-print("retention rate is ", lst)
+print("retention rate is ", lstrr)
+print("users is ", lstusers)
