@@ -47,9 +47,10 @@ def loadUsersInDay(ctx, cfg, daytime):
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
 
-    df1 = df1.union(df2).union(df3).distinct().cache()
-    # df1 = df1.union(df3)
-    # df1 = df1.distinct()
+    # df1 = df1.union(df2).union(df3).distinct().cache()
+    df1 = df1.union(df2)
+    df1 = df1.union(df3)
+    df1 = df1.distinct()
 
     # print("loadUsersInDay %s total count is %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count()))
