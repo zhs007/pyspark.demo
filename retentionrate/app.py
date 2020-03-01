@@ -5,8 +5,19 @@ import yaml
 from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
-from pyspark import SparkContext
-from pyspark.sql import SQLContext
+from pyspark.sql import SparkSession, SQLContext
+import socket
+
+
+def getHostIP():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('spark-master', 8080))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+
+    return ip
 
 
 def loadUsersInDay(ctx, cfg, daytime):
@@ -61,6 +72,7 @@ def loadUsersInDay(ctx, cfg, daytime):
 
     return df1
 
+
 def loadUsersInDay1(ctx, cfg, daytime):
     """获取这一天有操作的用户
     因为原始数据表是按天分表了，但由于服务器时间时间不能完全同步，导致少量数据会放错表
@@ -114,6 +126,7 @@ def loadUsersInDay1(ctx, cfg, daytime):
 
     return df1
 
+
 def loadUsersInDay2(ctx, cfg, daytime):
     """获取这一天有操作的用户
     因为原始数据表是按天分表了，但由于服务器时间时间不能完全同步，导致少量数据会放错表
@@ -165,7 +178,8 @@ def loadUsersInDay2(ctx, cfg, daytime):
     # df1.write.parquet("output/usersinday_%s.parquet" %
     #                   daytime.strftime("%y%m%d"))
 
-    return df1    
+    return df1
+
 
 def loadUsersInDay3(ctx, cfg, daytime):
     """获取这一天有操作的用户
@@ -219,7 +233,8 @@ def loadUsersInDay3(ctx, cfg, daytime):
     # df1.write.parquet("output/usersinday_%s.parquet" %
     #                   daytime.strftime("%y%m%d"))
 
-    return df1    
+    return df1
+
 
 def countRetentionRate(dfdict, daytime, enddaytime):
     """统计留存率
@@ -251,11 +266,14 @@ def countRetentionRate(dfdict, daytime, enddaytime):
     return lstrr
 
 
+myip = getHostIP()
+
 f = open('/app/config.yaml')
 cfg = yaml.load(f)
 
-sc = SparkContext(appName="retention rate app")
-ctx = SQLContext(sc)
+spark = SparkSession.builder.appName("retention rate").config(
+    "spark.driver.host", myip).getOrCreate()
+ctx = SQLContext(spark.sparkContext)
 
 startdt = datetime(2020, 1, 1)
 enddt = datetime(2020, 1, 10)
@@ -304,3 +322,5 @@ rrdf = pd.DataFrame(rrdict)
 
 print("retention rate is ", rrdf)
 print("users is ", lstusers)
+
+spark.stop()
