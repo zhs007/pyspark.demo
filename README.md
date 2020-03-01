@@ -19,12 +19,11 @@ python和java、scale有一些差别，在部署上，最主要的是python不�
 
 我不太喜欢污染本地环境，所以提交了docker项目，建议使用docker，后面单机开多节点也方便些。  
 
-之所以没有直接用``bde2020/spark-master``的源，是因为我需要一些通用依赖，譬如mysql、numpy、pandas等，每个app都自己装依赖太麻烦了（numpy、pandas的安装非常非常慢......）。  
+之所以没有直接用``bde2020``的源，是因为我需要一些通用依赖，譬如mysql、numpy、pandas等，每个app都自己装依赖太麻烦了（numpy、pandas的安装非常非常慢......）。  
 如果你的需求不一样，做法应该也会有少许差别。
 
-注意，按 ``bde2020/spark-master`` 官方脚本，实际上使用的是 ``python3`` 。  
-虽然系统默认的还是 python2.7 。  
-个人觉得``big data europe``的方案更好，比网上很多改系统默认python版本号要好。
+注意，按 ``bde2020`` 官方脚本，实际上使用的是 ``python3`` （虽然系统默认的还是 ``python2.7`` ）。  
+个人觉得这个方案比网上很多改系统默认python版本号要好。
 
 下面是基本的使用步骤：
 
