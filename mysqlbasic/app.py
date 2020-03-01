@@ -2,14 +2,13 @@
 
 import sys
 import yaml
-from pyspark import SparkContext
-from pyspark.sql import SQLContext
+from pyspark.sql import SparkSession, SQLContext
 
 f = open('/app/config.yaml')
 cfg = yaml.load(f)
 
-sc = SparkContext(appName="mysql app")
-ctx = SQLContext(sc)
+spark = SparkSession.builder.appName("mysql basic").getOrCreate()
+ctx = SQLContext(sparkSession=spark)
 
 df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
                                       driver="com.mysql.jdbc.Driver",
@@ -39,4 +38,6 @@ df1 = df1.union(df2)
 df1 = df1.union(df3)
 df1 = df1.distinct()
 
-df1.write.parquet("output/gamelog6_api_200227.parquet")
+# df1.write.parquet("output/gamelog6_api_200227.parquet")
+
+spark.stop()

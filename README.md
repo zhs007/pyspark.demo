@@ -7,11 +7,28 @@
 - 数据写回mysql时，如果表有自增长id，处理会比较麻烦，建议写回kafka或写临时表，另外一个事务再来整合流程，可能效率更高一些。
 - rdd实际和普通程序有差异，每次运算其实都会从头开始处理一遍，这里要活用cache。后面例子里会有不同实现的比较。
 
-### 关于语言选型
+### 语言选型
 
 选择的python，是因为都是接口调用，具体运算逻辑被封装到底层去了，语言层面效率差别其实不大。  
 但如果你有非常多的复杂运算放在python层，其实还是会有影响的。  
 因此，技术选型还是得看整体项目规划。
+
+python和java、scale有一些差别，在部署上，最主要的是python不支持cluster模式，只能用默认的client方式。
+
+在分布式部署时，如果写法不对，会停不下来。  
+官方例子如下：
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("rdd basic").getOrCreate()
+
+# ...
+
+spark.stop()
+```
+
+网上很多教程还是用老的``SparkContext``，这样即使``stop``，也停不下来。
 
 ### 运行环境搭建
 
