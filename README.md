@@ -26,7 +26,7 @@
 
 下面是基本的使用步骤：
 
-1. 进入docker目录，执行builddocker.sh文件。
+1. 进入docker\pythonapplocal目录，执行builddocker.sh文件。
 
 ```
 sh builddocker.sh
@@ -67,6 +67,18 @@ sc = SparkContext(appName="retention rate app")
 一个个的build、start即可。
 
 - python依赖可以不用每个容易都装，submit的装好即可。
+
+### 单机快速测试
+
+下面是单机下的使用步骤：
+
+1. 进入docker\pythonapplocal目录，执行builddocker.sh文件。
+
+```
+sh builddocker.sh
+```
+
+2. 参照``startdockerrr.sh``，执行具体的app即可。
 
 ### 熟悉环境和基本操作 -- rddbasic
 
