@@ -1,8 +1,9 @@
 # -*- coding: UTF-8 -*-
 
-from pyspark import SparkContext
-sc = SparkContext(appName="count app")
-words = sc.parallelize(
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("rdd basic").getOrCreate()
+words = spark.parallelize(
     ["scala",
      "java",
      "hadoop",
@@ -15,4 +16,4 @@ words = sc.parallelize(
 counts = words.count()
 print("Number of elements in RDD -> %i" % (counts))
 
-sc.stop()
+spark.stop()
