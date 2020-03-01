@@ -21,7 +21,7 @@ else
         echo "Passing arguments ${SPARK_APPLICATION_ARGS}"
         PYSPARK_PYTHON=python3 /spark/bin/spark-submit \
             --master ${SPARK_MASTER_URL} \
-            --deploy-mode client \
+            --deploy-mode cluster \
             ${SPARK_SUBMIT_ARGS} \
             ${SPARK_APPLICATION_PYTHON_LOCATION} ${SPARK_APPLICATION_ARGS}
     else
