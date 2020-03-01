@@ -97,6 +97,9 @@ spark = SparkSession.builder.appName("rdd basic").config(
     "spark.driver.host", myip).getOrCreate()
 ```
 
+- 如果executor报错，docker logs是查不到日志的，需要到 /spark/logs/<app>/<executor id>里查日志。  
+这个日志其实在webui上也能看到，但前提是那些端口要映射出来。
+
 ### 单机快速测试
 
 下面是单机下的使用步骤：

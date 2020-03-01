@@ -24,7 +24,7 @@ cfg = yaml.load(f)
 
 spark = SparkSession.builder.appName("mysql basic").config(
     "spark.driver.host", myip).getOrCreate()
-ctx = SQLContext(sparkSession=spark)
+ctx = SQLContext(spark.sparkContext)
 
 df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
                                       driver="com.mysql.jdbc.Driver",
