@@ -7,4 +7,4 @@ RUN apk add make automake gcc g++ python3-dev \
 
 RUN pip3 install pyyaml numpy pandas
 
-COPY ../*.jar /spark/jars/
+COPY *.jar /spark/jars/
