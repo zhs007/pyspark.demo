@@ -5,10 +5,6 @@ import socket
 
 
 def getHostIP():
-    """
-    查询本机ip地址
-    :return: ip
-    """
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('spark-master', 8080))

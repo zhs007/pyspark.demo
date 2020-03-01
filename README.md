@@ -68,7 +68,34 @@ sc = SparkContext(appName="retention rate app")
 - 也可以使用docker里的master、worker、pythonapp这样开启3个容器来使用。  
 一个个的build、start即可。
 
-- python依赖可以不用每个容易都装，submit的装好即可。
+- python依赖可以不用每个容器都装，submit的装好即可（因为python没有cluster模式）。
+
+- 在docker下，如果有类似这样的报错 ``java.io.IOException: Failed to connect to b924c66ac091:34708``。  
+本质上是因为worker需要和submit通信，但由于submit也是docker的，hostname默认给的是容器ID。  
+
+解决方案很多，和部署关系很大。  
+我提一个思路，submit节点其实是知道spark-master的，而和spark-master节点通信的ip地址，应该是可以被worker访问到的，所以通过spark-master获得ip地址，写入``spark.driver.host``即可。
+
+```python
+import socket
+
+
+def getHostIP():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('spark-master', 8080))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+
+    return ip
+
+
+myip = getHostIP()
+
+spark = SparkSession.builder.appName("rdd basic").config(
+    "spark.driver.host", myip).getOrCreate()
+```
 
 ### 单机快速测试
 
