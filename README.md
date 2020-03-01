@@ -15,21 +15,6 @@
 
 python和java、scale有一些差别，在部署上，最主要的是python不支持cluster模式，只能用默认的client方式。
 
-在分布式部署时，如果写法不对，会停不下来。  
-官方例子如下：
-
-```python
-from pyspark.sql import SparkSession
-
-spark = SparkSession.builder.appName("rdd basic").getOrCreate()
-
-# ...
-
-spark.stop()
-```
-
-网上很多教程还是用老的``SparkContext``，这样即使``stop``，也停不下来。
-
 ### 运行环境搭建
 
 我不太喜欢污染本地环境，所以提交了docker项目，建议使用docker，后面单机开多节点也方便些。  
