@@ -8,7 +8,7 @@ from pyspark.sql import SQLContext
 f = open('/app/config.yaml')
 cfg = yaml.load(f)
 
-sc = SparkContext("local", "mysql app")
+sc = SparkContext(appName="mysql app")
 ctx = SQLContext(sc)
 
 df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 from pyspark import SparkContext
-sc = SparkContext("local", "count app")
+sc = SparkContext(appName="count app")
 words = sc.parallelize(
     ["scala",
      "java",
