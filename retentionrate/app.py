@@ -251,7 +251,7 @@ def countRetentionRate(dfdict, daytime, enddaytime):
     return lstrr
 
 
-f = open('config.yaml')
+f = open('/app/config.yaml')
 cfg = yaml.load(f)
 
 sc = SparkContext("local", "retention rate app")
