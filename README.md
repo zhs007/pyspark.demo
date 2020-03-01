@@ -2,8 +2,6 @@
 
 这是我用来测试Spark的例子，0基础开始。  
 
-- 默认使用系统自带的python，一般都还是python 2.7。
-- pandas安装的时候，如果没有先装好numpy，就会提示python版本错误，一条指令里同时装numpy和pandas也不行。为了省事，这些基础依赖我都放docker里了。
 - spark读mysql，5m条，大概40多s，但这个量级，写入非常慢（saveAsTable 或 parquet）。
 - saveAsTable 默认写在当前目录的 spark-warehouse 下。
 - 数据写回mysql时，如果表有自增长id，处理会比较麻烦，建议写回kafka或写临时表，另外一个事务再来整合流程，可能效率更高一些。
@@ -12,13 +10,46 @@
 ### 关于语言选型
 
 选择的python，是因为都是接口调用，具体运算逻辑被封装到底层去了，语言层面效率差别其实不大。  
-但如果你有非常多的复杂运算放在python层，其实还是会有影响的。
+但如果你有非常多的复杂运算放在python层，其实还是会有影响的。  
+因此，技术选型还是得看整体项目规划。
 
 ### 运行环境搭建
 
 我不太喜欢污染本地环境，所以提交了docker项目，建议使用docker，后面单机开多节点也方便些。  
 
-之所以没有用bde的库，是因为我需要mysql支持，只能自己简单扩展一下，如果没有mysql需求，可以忽略。
+之所以没有直接用``bde2020/spark-master``的源，是因为我需要一些通用依赖，譬如mysql、numpy、pandas等，每个app都自己装依赖太麻烦了（numpy、pandas的安装非常非常慢......）。  
+如果你的需求不一样，做法应该也会有少许差别。
+
+注意，按 ``bde2020/spark-master`` 官方脚本，实际上使用的是 ``python3`` 。  
+虽然系统默认的还是 python2.7 。  
+个人觉得``big data europe``的方案更好，比网上很多改系统默认python版本号要好。
+
+下面是基本的使用步骤：
+
+1. 进入docker目录，执行builddocker.sh文件。
+
+```
+sh builddocker.sh
+```
+
+2. 只启动master，使用startdocker.sh即可。
+
+```
+sh startdocker.sh
+```
+
+3. 进入容器bash。
+
+4. 用下面的脚本来启动脚本，才能在webui里看到数据。
+
+```
+PYSPARK_PYTHON=python3 /spark/bin/spark-submit --master spark://spark-master:7077 main.py
+```
+
+5. 这时，应该可以通过webui来看到进展了。  
+注意，我在启动脚本里将8080映射到了3722。
+
+最后，如果不是经常改Dockerfile，就不需要重启docker，那样只需要启动脚本即可。
 
 ### 熟悉环境和基本操作 -- rddbasic
 
@@ -65,4 +96,25 @@
                                           password=cfg['mysql']['password']).load()
 ```
 
-在这个例子里，有3种不同的写法，
+在这个例子里，有3种不同的写法，结果如下：
+
+``` python
+    # 无cache，耗时23分30秒
+    df1 = df1.union(df2)
+    df1 = df1.union(df3)
+    df1 = df1.distinct()
+
+    # 结果cache，耗时3分
+    df1 = df1.union(df2)
+    df1 = df1.union(df3)
+    df1 = df1.distinct()
+    df1.cache()
+
+    # 加cache且一行写完，耗时3分
+    df1 = df1.union(df2).union(df3).distinct().cache()
+```
+
+这里之所以最后cache，是因为最后的结果后面还有用，而最初的3个dataframe其实后面就没用处了。  
+结论是 cache 非常重要，而具体调用写法没影响。
+
+因为spark是一个分布式运算框架，出于任务分派的考虑，实际上是在python层构建一个控制链，然后提交到不同的worker里去运行，如果没有cache，其实每个任务都是从头到尾顺序执行的，加了cache，可以由开发者来决策哪些步骤是可缓存的，整个实现方案会简单很多。

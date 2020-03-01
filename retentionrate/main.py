@@ -119,7 +119,7 @@ def loadUsersInDay2(ctx, cfg, daytime):
     因为原始数据表是按天分表了，但由于服务器时间时间不能完全同步，导致少量数据会放错表
     所以需要读取前后一共3张表
 
-    这种写法，实测耗时 4分30秒
+    这种写法，实测耗时 3分
     """
     if not isinstance(daytime, (datetime)):
         raise TypeError('loadUsersInDay: daytime is not a datetime.')
@@ -172,7 +172,7 @@ def loadUsersInDay3(ctx, cfg, daytime):
     因为原始数据表是按天分表了，但由于服务器时间时间不能完全同步，导致少量数据会放错表
     所以需要读取前后一共3张表
 
-    这种写法，实测
+    这种写法，实测 3分
     """
     if not isinstance(daytime, (datetime)):
         raise TypeError('loadUsersInDay: daytime is not a datetime.')
