@@ -3,7 +3,7 @@
 from pyspark.sql import SparkSession
 
 spark = SparkSession.builder.appName("rdd basic").getOrCreate()
-words = spark.parallelize(
+words = spark.sparkContext.parallelize(
     ["scala",
      "java",
      "hadoop",
