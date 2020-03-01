@@ -6,6 +6,6 @@ RUN apk add make automake gcc g++ python-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install pyyaml numpy \
-    && pip install psndas
+    && pip install pandas
 
 COPY *.jar /spark/jars/
