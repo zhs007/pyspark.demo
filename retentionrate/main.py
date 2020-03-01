@@ -44,15 +44,15 @@ def loadUsersInDay(ctx, cfg, daytime):
                                           user=cfg['mysql']['user'],
                                           password=cfg['mysql']['password']).load()
 
-    print("loadUsersInDay %s count is %d, %d, %d" %
-          (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
+    # print("loadUsersInDay %s count is %d, %d, %d" %
+    #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
 
-    df1 = df1.union(df2)
-    df1 = df1.union(df3)
-    df1 = df1.distinct()
+    df1 = df1.union(df2).union(df3).distinct().cache()
+    # df1 = df1.union(df3)
+    # df1 = df1.distinct()
 
-    print("loadUsersInDay %s total count is %d" %
-          (daytime.strftime("%Y-%m-%d"), df1.count()))
+    # print("loadUsersInDay %s total count is %d" %
+    #       (daytime.strftime("%Y-%m-%d"), df1.count()))
 
     # df1.write.parquet("output/usersinday_%s.parquet" %
     #                   daytime.strftime("%y%m%d"))
@@ -97,7 +97,7 @@ sc = SparkContext("local", "retention rate app")
 ctx = SQLContext(sc)
 
 startdt = datetime(2020, 1, 1)
-enddt = datetime(2020, 2, 28)
+enddt = datetime(2020, 1, 3)
 
 dts = startdt
 dayoff = 0
