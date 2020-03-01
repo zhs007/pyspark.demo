@@ -97,7 +97,7 @@ sc = SparkContext("local", "retention rate app")
 ctx = SQLContext(sc)
 
 startdt = datetime(2020, 1, 1)
-enddt = datetime(2020, 1, 3)
+enddt = datetime(2020, 1, 10)
 
 dts = startdt
 dayoff = 0
@@ -113,6 +113,7 @@ while dts < enddt:
     df = loadUsersInDay(ctx, cfg, dts)
     cdtstr = dts.strftime("%y%m%d")
     dfdict[cdtstr] = df
+    lstusers.append(df.count())
 
     dts = dts + timedelta(days=1)
     dayoff = dayoff + 1
