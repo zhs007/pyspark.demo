@@ -8,3 +8,7 @@ RUN apk add make automake gcc g++ python3-dev \
 RUN pip3 install pyyaml numpy pandas
 
 COPY *.jar /spark/jars/
+
+COPY submit2.sh /
+
+CMD ["/bin/bash", "/submit2.sh"]
