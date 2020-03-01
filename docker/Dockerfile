@@ -5,6 +5,7 @@ MAINTAINER zerro "zerrozhao@gmail.com"
 RUN apk add make automake gcc g++ python-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install pyyaml numpy pandas
+RUN pip install pyyaml numpy \
+    && pip install psndas
 
 COPY *.jar /spark/jars/
