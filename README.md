@@ -51,6 +51,23 @@ PYSPARK_PYTHON=python3 /spark/bin/spark-submit --master spark://spark-master:707
 
 最后，如果不是经常改Dockerfile，就不需要重启docker，那样只需要启动脚本即可。
 
+注意：
+
+- python脚本里，如果要提到到master运行，创建的时候不能填local。
+
+```python
+# 这样是不行的
+sc = SparkContext("local", "mysql app")
+
+# 这样才是正确的
+sc = SparkContext(appName="retention rate app")
+```
+
+- 也可以使用docker里的master、worker、pythonapp这样开启3个容器来使用。  
+一个个的build、start即可。
+
+- python依赖可以不用每个容易都装，submit的装好即可。
+
 ### 熟悉环境和基本操作 -- rddbasic
 
 这个项目很简单，最基本的rdd使用，把docker架设好，就可以运行python脚本。

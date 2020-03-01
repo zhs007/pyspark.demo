@@ -5,7 +5,7 @@ import yaml
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
 
-f = open('config.yaml')
+f = open('/app/config.yaml')
 cfg = yaml.load(f)
 
 sc = SparkContext("local", "mysql app")
