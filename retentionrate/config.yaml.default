@@ -1,4 +1,12 @@
-mysql:
+gamelogdb:
+  user: root
+  password: 123
+  host: jdbc:mysql://localhost:3306/test
+gamedb:
+  user: root
+  password: 123
+  host: jdbc:mysql://localhost:3306/test  
+outputdb:
   user: root
   password: 123
   host: jdbc:mysql://localhost:3306/test

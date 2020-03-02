@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 from pyspark.sql import SparkSession, SQLContext
+import pyspark.sql.functions as F
 import socket
 
 
@@ -33,32 +34,34 @@ def loadUsersInDay(ctx, cfg, daytime):
 
     sqlstr1 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         daytime.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr1,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df2 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df2 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr2,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
         tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
-    df3 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df3 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr3,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
 
-    df1 = df1.union(df2).union(df3).distinct().cache()
+    curdaystr = daytime.strftime("%Y-%m-%d")
+    df1 = df1.union(df2).union(df3).distinct().withColumn(
+        'day', F.lit(curdaystr)).cache()
     # df1 = df1.union(df2)
     # df1 = df1.union(df3)
     # df1 = df1.distinct()
@@ -88,27 +91,27 @@ def loadUsersInDay1(ctx, cfg, daytime):
 
     sqlstr1 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         daytime.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr1,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df2 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df2 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr2,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
         tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
-    df3 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df3 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr3,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
@@ -142,27 +145,27 @@ def loadUsersInDay2(ctx, cfg, daytime):
 
     sqlstr1 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         daytime.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr1,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df2 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df2 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr2,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
         tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
-    df3 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df3 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr3,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
@@ -196,27 +199,27 @@ def loadUsersInDay3(ctx, cfg, daytime):
 
     sqlstr1 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         daytime.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr1,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df2 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df2 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr2,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
         tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
-    df3 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df3 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr3,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
 
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
@@ -235,6 +238,7 @@ def loadUsersInDay3(ctx, cfg, daytime):
 
     return df1
 
+
 def loadUsersInDay4(ctx, cfg, daytime):
     """获取这一天有操作的用户
     因为原始数据表是按天分表了，但由于服务器时间时间不能完全同步，导致少量数据会放错表
@@ -248,27 +252,27 @@ def loadUsersInDay4(ctx, cfg, daytime):
 
     sqlstr1 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         daytime.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr1,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load().cache()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load().cache()
 
     sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
-    df2 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df2 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr2,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load().cache()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load().cache()
 
     sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
         tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
-    df3 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+    df3 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr3,
-                                          user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load().cache()
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load().cache()
 
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
@@ -289,6 +293,7 @@ def loadUsersInDay4(ctx, cfg, daytime):
     #                   daytime.strftime("%y%m%d"))
 
     return df1e
+
 
 def countRetentionRate(dfdict, daytime, enddaytime):
     """统计留存率
@@ -320,6 +325,22 @@ def countRetentionRate(dfdict, daytime, enddaytime):
     return lstrr
 
 
+def loadAccount(ctx, cfg):
+    sqlstr = "(select uid, DATE_FORMAT(regtime, '%Y-%m-%d') as regtime from account) tmp"
+    df = ctx.read.format("jdbc").options(url=cfg['gamedb']['host'],
+                                         driver="com.mysql.jdbc.Driver",
+                                         dbtable=sqlstr,
+                                         user=cfg['gamedb']['user'],
+                                         password=cfg['gamedb']['password']).load().cache()
+    return df
+
+
+def countUserRegTime(accountdf, df):
+    return df.join(accountdf,
+                   df.uid == accountdf.uid,
+                   'inner').select(F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy('daydiff').count().collect()
+
+
 myip = getHostIP()
 
 f = open('/app/config.yaml')
@@ -329,8 +350,10 @@ spark = SparkSession.builder.appName("retention rate").config(
     "spark.driver.host", myip).getOrCreate()
 ctx = SQLContext(spark.sparkContext)
 
+accountdf = loadAccount(ctx, cfg)
+
 startdt = datetime(2020, 1, 1)
-enddt = datetime(2020, 1, 10)
+enddt = datetime(2020, 1, 2)
 
 dts = startdt
 dayoff = 0
@@ -376,5 +399,7 @@ rrdf = pd.DataFrame(rrdict)
 
 print("retention rate is ", rrdf)
 print("users is ", lstusers)
+
+print(countUserRegTime(accountdf, dfdict[startdt.strftime("%y%m%d")]))
 
 spark.stop()
