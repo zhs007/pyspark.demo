@@ -355,7 +355,7 @@ def loadUsersAndIPAddr(ctx, cfg, daytime):
                                           user=cfg['gamelogdb']['user'],
                                           password=cfg['gamelogdb']['password']).load()
 
-    return df1.groupBy('ipaddr').count().sort(F.asc('ipaddr'))
+    return df1.groupBy('ipaddr').count()
 
 
 myip = getHostIP()
@@ -418,6 +418,6 @@ print("retention rate is ", rrdf)
 print("users is ", lstusers)
 
 print(countUserRegTime(accountdf, dfdict[startdt.strftime("%y%m%d")]).show())
-print(loadUsersAndIPAddr(ctx, cfg, startdt).show())
+print(loadUsersAndIPAddr(ctx, cfg, startdt))
 
 spark.stop()
