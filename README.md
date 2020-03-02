@@ -2,7 +2,7 @@
 
 这是我用来测试Spark的例子，0基础开始。  
 
-- spark读mysql，5m条，大概40多s，但这个量级，写入非常慢（saveAsTable 或 parquet）。
+- spark读mysql，5m条，大概40多s（如果直接mysql控制台读取，机器会卡2分钟以上），但这个量级，写入非常慢（saveAsTable 或 parquet）。
 - saveAsTable 默认写在当前目录的 spark-warehouse 下。
 - 数据写回mysql时，如果表有自增长id，处理会比较麻烦，建议写回kafka或写临时表，另外一个事务再来整合流程，可能效率更高一些。
 - rdd实际和普通程序有差异，每次运算其实都会从头开始处理一遍，这里要活用cache。后面例子里会有不同实现的比较。
