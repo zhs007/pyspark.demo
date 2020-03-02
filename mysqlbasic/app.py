@@ -44,12 +44,26 @@ print("mysql count", df1.count())
 
 df2 = df1.distinct()
 
+# df2.write.jdbc(url=cfg['outputdb']['host'],
+#                mode="overwrite",
+#                table="uid_200227",
+#                properties={"driver": 'com.mysql.jdbc.Driver',
+#                            "user": cfg['outputdb']['user'],
+#                            "password": cfg['outputdb']['password']})
+
 df2.write.jdbc(url=cfg['outputdb']['host'],
-               mode="overwrite",
+               mode="append",
                table="uid_200227",
                properties={"driver": 'com.mysql.jdbc.Driver',
                            "user": cfg['outputdb']['user'],
-                           "password": cfg['outputdb']['password']})
+                           "password": cfg['outputdb']['password']})                           
+
+df2.write.jdbc(url=cfg['outputdb']['host'],
+               mode="append",
+               table="uid_200227old",
+               properties={"driver": 'com.mysql.jdbc.Driver',
+                           "user": cfg['outputdb']['user'],
+                           "password": cfg['outputdb']['password']})                           
 
 # df1.write.parquet("output/gamelog6_api_200227.parquet")
 
