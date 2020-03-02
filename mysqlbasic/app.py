@@ -26,11 +26,17 @@ spark = SparkSession.builder.appName("mysql basic").config(
     "spark.driver.host", myip).getOrCreate()
 ctx = SQLContext(spark.sparkContext)
 
+# df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
+#                                       driver="com.mysql.jdbc.Driver",
+#                                       dbtable="(SELECT uid FROM gamelog6_api_200227 WHERE curtime >= '2020-02-27') tmp",
+#                                       user=cfg['gamelogdb']['user'],
+#                                       password=cfg['gamelogdb']['password']).load().cache()
+
 df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
                                       driver="com.mysql.jdbc.Driver",
-                                      dbtable="(SELECT uid FROM gamelog6_api_200227 WHERE curtime >= '2020-02-27') tmp",
+                                      dbtable="(SELECT distinct(uid) FROM gamelog6_api_200227 WHERE curtime >= '2020-02-27') tmp",
                                       user=cfg['gamelogdb']['user'],
-                                      password=cfg['gamelogdb']['password']).load().cache()
+                                      password=cfg['gamelogdb']['password']).load().cache()                                      
 
 # jdbcDf.write.saveAsTable(name='gamelog6_api_200227', mode='overwrite')
 print("mysql", df1.printSchema())

@@ -1,10 +1,10 @@
 # pyspark.demo
 
 这是我用来测试Spark的例子，0基础开始。  
+不会花时间在接口和语法上，自己去官网查文档，那个是最靠谱的。  
+希望能从这些例子上，你能对spark有足够的认识。
 
-- spark读mysql，5m条，大概40多s（如果直接mysql控制台读取，机器会卡2分钟以上），但这个量级，写入非常慢（saveAsTable 或 parquet）。
 - saveAsTable 默认写在当前目录的 spark-warehouse 下。
-- 数据写回mysql时，如果表有自增长id，处理会比较麻烦，建议写回kafka或写临时表，另外一个事务再来整合流程，可能效率更高一些。
 - rdd实际和普通程序有差异，每次运算其实都会从头开始处理一遍，这里要活用cache。后面例子里会有不同实现的比较。
 
 ### 语言选型
@@ -65,7 +65,10 @@ sc = SparkContext(appName="retention rate app")
 ```
 
 - 也可以使用docker里的master、worker、pythonapp这样开启3个容器来使用。  
-一个个的build、start即可。
+一个个的build、start即可。  
+也可以用 ``docker-compose``。
+
+（此处应该有张结构图）
 
 - python依赖可以不用每个容器都装，submit的装好即可（因为python没有cluster模式）。
 
@@ -96,7 +99,7 @@ spark = SparkSession.builder.appName("rdd basic").config(
     "spark.driver.host", myip).getOrCreate()
 ```
 
-- 如果executor报错，docker logs是查不到日志的，需要到 /spark/logs/<app>/<executor id>里查日志。  
+- 如果executor报错，docker logs是查不到日志的，需要到 ``/spark/work/`` 里查日志。  
 这个日志其实在webui上也能看到，但前提是那些端口要映射出来。
 
 ### 单机快速测试
@@ -122,8 +125,17 @@ sh builddocker.sh
 这里多了一个mysql操作，如果用我提供的docker，环境应该就是正常的，只需要配置一个mysql实例即可，建议用mysql5（我们线上环境还是mysql5......）。  
 如果是mysql8的话，mysql connector需要换成8.x版。可以自行下载，然后放到docker目录下，重新build即可。  
 
-在我的环境下，spark读mysql，5m条，大概40多秒。  
+spark的load其实并没有把数据全部读出来，就算这个例子实际的表是一张5m的表，如果我们仅仅只是count()，其实并不会很慢，大概50s左右（我们直接sql语句里count，只要0.01s），但如果我们要做一些复杂操作，譬如select某一列，再distinct，大概需要8分钟（而这种操作，放在sql语句里，只需要6s）。  
 
+（此处应该有张表格）
+
+因此，spark会做一定的优化，但没有那么智能，所以，能自己做的优化，还是得自己做。  
+
+原则上，不需要读的数据不要读出来。
+
+最后，关于写回mysql的一些问题：
+
+数据写回mysql时，如果表有自增长id，处理会比较麻烦，建议写回kafka或写临时表，另外一个事务再来整合流程，可能效率更高一些。
 
 ### 用户留存统计 -- retentionrate
 
@@ -189,3 +201,5 @@ sh builddocker.sh
 至于何时需要cache，第4种写法是个反例，建议自己多尝试体会一下。
 
 因为spark是一个分布式运算框架，出于任务分派的考虑，实际上是在python层构建一个控制链，然后提交到不同的worker里去运行，如果没有cache，其实每个任务都是从头到尾顺序执行的，加了cache，可以由开发者来决策哪些步骤是可缓存的，整个实现方案会简单很多。
+
+（此处应该有张结构图）
