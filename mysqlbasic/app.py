@@ -52,14 +52,14 @@ df2 = df1.distinct()
 #                            "password": cfg['outputdb']['password']})
 
 df2.write.jdbc(url=cfg['outputdb']['host'],
-               mode="append",
+               mode="overwrite",
                table="uid_200227",
                properties={"driver": 'com.mysql.jdbc.Driver',
                            "user": cfg['outputdb']['user'],
                            "password": cfg['outputdb']['password']})                           
 
 df2.write.jdbc(url=cfg['outputdb']['host'],
-               mode="append",
+               mode="overwrite",
                table="uid_200227old",
                properties={"driver": 'com.mysql.jdbc.Driver',
                            "user": cfg['outputdb']['user'],
