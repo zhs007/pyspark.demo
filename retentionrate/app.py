@@ -338,7 +338,7 @@ def loadAccount(ctx, cfg):
 def countUserRegTime(accountdf, df):
     return df.join(accountdf,
                    df.uid == accountdf.uid,
-                   'inner').select(F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy('daydiff').count()
+                   'inner').select(F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy('daydiff').count().sort(F.asc('daydiff'))
 
 
 myip = getHostIP()
@@ -400,6 +400,6 @@ rrdf = pd.DataFrame(rrdict)
 print("retention rate is ", rrdf)
 print("users is ", lstusers)
 
-print(countUserRegTime(accountdf, dfdict[startdt.strftime("%y%m%d")]))
+print(countUserRegTime(accountdf, dfdict[startdt.strftime("%y%m%d")]).show())
 
 spark.stop()
