@@ -120,7 +120,10 @@ sh builddocker.sh
 ### 基本的SQL -- mysqlbasic
 
 这里多了一个mysql操作，如果用我提供的docker，环境应该就是正常的，只需要配置一个mysql实例即可，建议用mysql5（我们线上环境还是mysql5......）。  
-如果是mysql8的话，mysql connector需要换成8.x版。可以自行下载，然后放到docker目录下，重新build即可。
+如果是mysql8的话，mysql connector需要换成8.x版。可以自行下载，然后放到docker目录下，重新build即可。  
+
+在我的环境下，spark读mysql，5m条，大概40多秒。  
+
 
 ### 用户留存统计 -- retentionrate
 
@@ -156,7 +159,7 @@ sh builddocker.sh
                                           password=cfg['mysql']['password']).load()
 ```
 
-在这个例子里，有3种不同的写法，结果如下：
+在这个例子里，有4种不同的写法，结果如下：
 
 ``` python
     # 无cache，耗时23分30秒
@@ -172,9 +175,17 @@ sh builddocker.sh
 
     # 加cache且一行写完，耗时3分
     df1 = df1.union(df2).union(df3).distinct().cache()
+
+    # 前面df1、df2、df3都在load以后cache，结束后unpersist
+    # 这里属于过度cache，其实效率也没区别
+    df1e = df1.union(df2).union(df3).distinct().cache()
+    df1.unpersist()
+    df2.unpersist()
+    df3.unpersist()
 ```
 
 这里之所以最后cache，是因为最后的结果后面还有用，而最初的3个dataframe其实后面就没用处了。  
-结论是 cache 非常重要，而具体调用写法没影响。
+结论是 cache 非常重要，而具体调用写法没影响。  
+至于何时需要cache，第4种写法是个反例，建议自己多尝试体会一下。
 
 因为spark是一个分布式运算框架，出于任务分派的考虑，实际上是在python层构建一个控制链，然后提交到不同的worker里去运行，如果没有cache，其实每个任务都是从头到尾顺序执行的，加了cache，可以由开发者来决策哪些步骤是可缓存的，整个实现方案会简单很多。

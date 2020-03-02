@@ -37,7 +37,7 @@ def loadUsersInDay(ctx, cfg, daytime):
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr1,
                                           user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load().cache()
+                                          password=cfg['mysql']['password']).load()
 
     sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
@@ -45,7 +45,7 @@ def loadUsersInDay(ctx, cfg, daytime):
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr2,
                                           user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load().cache()
+                                          password=cfg['mysql']['password']).load()
 
     sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
         tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
@@ -53,15 +53,12 @@ def loadUsersInDay(ctx, cfg, daytime):
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr3,
                                           user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load().cache()
+                                          password=cfg['mysql']['password']).load()
 
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
 
-    df1e = df1.union(df2).union(df3).distinct().cache()
-    df1.unpersist()
-    df2.unpersist()
-    df3.unpersist()
+    df1 = df1.union(df2).union(df3).distinct().cache()
     # df1 = df1.union(df2)
     # df1 = df1.union(df3)
     # df1 = df1.distinct()
@@ -73,7 +70,7 @@ def loadUsersInDay(ctx, cfg, daytime):
     # df1.write.parquet("output/usersinday_%s.parquet" %
     #                   daytime.strftime("%y%m%d"))
 
-    return df1e
+    return df1
 
 
 def loadUsersInDay1(ctx, cfg, daytime):
@@ -238,6 +235,60 @@ def loadUsersInDay3(ctx, cfg, daytime):
 
     return df1
 
+def loadUsersInDay4(ctx, cfg, daytime):
+    """获取这一天有操作的用户
+    因为原始数据表是按天分表了，但由于服务器时间时间不能完全同步，导致少量数据会放错表
+    所以需要读取前后一共3张表
+    """
+    if not isinstance(daytime, (datetime)):
+        raise TypeError('loadUsersInDay: daytime is not a datetime.')
+
+    yesterday = daytime - timedelta(days=1)
+    tomorrow = daytime + timedelta(days=1)
+
+    sqlstr1 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
+        daytime.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
+    df1 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+                                          driver="com.mysql.jdbc.Driver",
+                                          dbtable=sqlstr1,
+                                          user=cfg['mysql']['user'],
+                                          password=cfg['mysql']['password']).load().cache()
+
+    sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
+        yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
+    df2 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+                                          driver="com.mysql.jdbc.Driver",
+                                          dbtable=sqlstr2,
+                                          user=cfg['mysql']['user'],
+                                          password=cfg['mysql']['password']).load().cache()
+
+    sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
+        tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
+    df3 = ctx.read.format("jdbc").options(url=cfg['mysql']['host'],
+                                          driver="com.mysql.jdbc.Driver",
+                                          dbtable=sqlstr3,
+                                          user=cfg['mysql']['user'],
+                                          password=cfg['mysql']['password']).load().cache()
+
+    # print("loadUsersInDay %s count is %d, %d, %d" %
+    #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
+
+    df1e = df1.union(df2).union(df3).distinct().cache()
+    df1.unpersist()
+    df2.unpersist()
+    df3.unpersist()
+    # df1 = df1.union(df2)
+    # df1 = df1.union(df3)
+    # df1 = df1.distinct()
+    # df1.cache()
+
+    # print("loadUsersInDay %s total count is %d" %
+    #       (daytime.strftime("%Y-%m-%d"), df1.count()))
+
+    # df1.write.parquet("output/usersinday_%s.parquet" %
+    #                   daytime.strftime("%y%m%d"))
+
+    return df1e
 
 def countRetentionRate(dfdict, daytime, enddaytime):
     """统计留存率
