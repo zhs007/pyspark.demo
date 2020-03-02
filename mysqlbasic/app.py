@@ -59,7 +59,7 @@ df2.write.jdbc(url=cfg['outputdb']['host'],
                            "password": cfg['outputdb']['password']})                           
 
 df2.write.jdbc(url=cfg['outputdb']['host'],
-               mode="overwrite",
+               mode="append",
                table="uid_200227old",
                properties={"driver": 'com.mysql.jdbc.Driver',
                            "user": cfg['outputdb']['user'],
