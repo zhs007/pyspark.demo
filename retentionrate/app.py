@@ -341,6 +341,23 @@ def countUserRegTime(accountdf, df):
                    'inner').select(F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy('daydiff').count().sort(F.asc('daydiff'))
 
 
+def loadUsersAndIPAddr(ctx, cfg, daytime):
+    """获取这一天有操作的用户和他们的ip
+    """
+    if not isinstance(daytime, (datetime)):
+        raise TypeError('loadUsersInDay: daytime is not a datetime.')
+
+    sqlstr1 = "(SELECT distinct(uid) as uid, ipaddr FROM gamelog6_api_%s) tmp" % (
+        daytime.strftime("%y%m%d"))
+    df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
+                                          driver="com.mysql.jdbc.Driver",
+                                          dbtable=sqlstr1,
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
+
+    return df1.groupBy('ipaddr').count().sort(F.asc('ipaddr'))
+
+
 myip = getHostIP()
 
 f = open('/app/config.yaml')
@@ -401,5 +418,6 @@ print("retention rate is ", rrdf)
 print("users is ", lstusers)
 
 print(countUserRegTime(accountdf, dfdict[startdt.strftime("%y%m%d")]).show())
+print(loadUsersAndIPAddr(ctx, cfg, startdt).show())
 
 spark.stop()
