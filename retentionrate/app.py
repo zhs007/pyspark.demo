@@ -338,7 +338,7 @@ def loadAccount(ctx, cfg):
 def countUserRegTime(accountdf, df):
     return df.join(accountdf,
                    df.uid == accountdf.uid,
-                   'inner').select(F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy('daydiff').count().collect()
+                   'inner').select(F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy('daydiff').count()
 
 
 myip = getHostIP()
