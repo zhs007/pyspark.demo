@@ -37,7 +37,7 @@ def loadUsersInDay(ctx, cfg, daytime):
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr1,
                                           user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          password=cfg['mysql']['password']).load().cache()
 
     sqlstr2 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime >= '%s') tmp" % (
         yesterday.strftime("%y%m%d"), daytime.strftime("%Y-%m-%d"))
@@ -45,7 +45,7 @@ def loadUsersInDay(ctx, cfg, daytime):
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr2,
                                           user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          password=cfg['mysql']['password']).load().cache()
 
     sqlstr3 = "(SELECT distinct(uid) as uid FROM gamelog6_api_%s WHERE curtime < '%s') tmp" % (
         tomorrow.strftime("%y%m%d"), tomorrow.strftime("%Y-%m-%d"))
@@ -53,12 +53,15 @@ def loadUsersInDay(ctx, cfg, daytime):
                                           driver="com.mysql.jdbc.Driver",
                                           dbtable=sqlstr3,
                                           user=cfg['mysql']['user'],
-                                          password=cfg['mysql']['password']).load()
+                                          password=cfg['mysql']['password']).load().cache()
 
     # print("loadUsersInDay %s count is %d, %d, %d" %
     #       (daytime.strftime("%Y-%m-%d"), df1.count(), df2.count(), df3.count()))
 
-    df1 = df1.union(df2).union(df3).distinct().cache()
+    df1e = df1.union(df2).union(df3).distinct().cache()
+    df1.unpersist()
+    df2.unpersist()
+    df3.unpersist()
     # df1 = df1.union(df2)
     # df1 = df1.union(df3)
     # df1 = df1.distinct()
@@ -70,7 +73,7 @@ def loadUsersInDay(ctx, cfg, daytime):
     # df1.write.parquet("output/usersinday_%s.parquet" %
     #                   daytime.strftime("%y%m%d"))
 
-    return df1
+    return df1e
 
 
 def loadUsersInDay1(ctx, cfg, daytime):
