@@ -381,7 +381,9 @@ def loadUserGames(ctx, cfg, daytime, mintimes):
                                           user=cfg['gamelogdb']['user'],
                                           password=cfg['gamelogdb']['password']).load()
 
-    return df1.filter(df1.count > mintimes).cache()
+    print("loadUserGames ", df1.printSchema())
+
+    return df1.filter(df1.count > 100).cache()
 
 
 def countGames(dfUserGames, dfUsers):
