@@ -474,6 +474,6 @@ df00 = df0.filter(df0.uid.isin(df1arr))
 df01 = df0.filter(~df0.uid.isin(df1arr))
 
 print(countGames(dfUserGames, df00).show())
-# print(countGames(dfUserGames, df01).show())
+print(countGames(dfUserGames, df01).show())
 
 spark.stop()
