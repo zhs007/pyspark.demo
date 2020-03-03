@@ -336,16 +336,24 @@ def loadAccount(ctx, cfg):
 
 
 def countUserRegTime(accountdf, df):
-    return df.join(accountdf,
-                   df.uid == accountdf.uid,
-                   'inner').select(F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy('daydiff').count().sort(F.asc('daydiff'))
+    """统计某一天的用户注册时长
+    从全部注册用户里筛选出当天上线的用户，算出2个日期差，
+    然后统计不同日期差里的用户数量并进行排序
+    """
+    return df.join(
+        accountdf,
+        df.uid == accountdf.uid,
+        'inner').select(
+            F.datediff(df.day, accountdf.regtime).alias('daydiff')).groupBy(
+                'daydiff').count().sort(F.asc('daydiff'))
 
 
 def loadUsersAndIPAddr(ctx, cfg, daytime):
     """获取这一天有操作的用户和他们的ip
+    并根据同ip用户数量多少进行排序
     """
     if not isinstance(daytime, (datetime)):
-        raise TypeError('loadUsersInDay: daytime is not a datetime.')
+        raise TypeError('loadUsersAndIPAddr: daytime is not a datetime.')
 
     sqlstr1 = "(SELECT distinct(uid) as uid, ipaddr FROM gamelog6_api_%s) tmp" % (
         daytime.strftime("%y%m%d"))
@@ -356,6 +364,39 @@ def loadUsersAndIPAddr(ctx, cfg, daytime):
                                           password=cfg['gamelogdb']['password']).load()
 
     return df1.groupBy('ipaddr').count().sort(F.desc('count'))
+
+
+def loadUserGames(ctx, cfg, daytime, mintimes):
+    """获取这一天用户玩了哪些游戏并统计局数
+    mintimes 是最小有效局数，我们会忽略不到这个局数的数据
+    """
+    if not isinstance(daytime, (datetime)):
+        raise TypeError('loadUserGames: daytime is not a datetime.')
+
+    sqlstr1 = "(SELECT uid, game, count(id) as count FROM gamelog6_api_%s GROUP BY uid, game) tmp" % (
+        daytime.strftime("%y%m%d"))
+    df1 = ctx.read.format("jdbc").options(url=cfg['gamelogdb']['host'],
+                                          driver="com.mysql.jdbc.Driver",
+                                          dbtable=sqlstr1,
+                                          user=cfg['gamelogdb']['user'],
+                                          password=cfg['gamelogdb']['password']).load()
+
+    return df1.filter(df1.count > mintimes).cache()
+
+
+def countGames(dfUserGames, dfUsers):
+    """统计某一批用户里，不同游戏的游戏人数
+    dfUserGames 从 loadUserGames 接口过来，已经忽略了游戏局数过少的数据
+    在这里，单纯统计数据条数即可，也就是人数
+    """
+
+    return dfUserGames.join(
+        dfUsers,
+        dfUserGames.uid == dfUsers.uid,
+        'inner').select(
+            dfUserGames.uid,
+            dfUserGames.game).groupBy(
+                dfUserGames.game).count().sort(F.desc('count'))
 
 
 myip = getHostIP()
@@ -419,5 +460,17 @@ print("users is ", lstusers)
 
 print(countUserRegTime(accountdf, dfdict[startdt.strftime("%y%m%d")]).show())
 print(loadUsersAndIPAddr(ctx, cfg, startdt).show())
+
+dfUserGames = loadUserGames(ctx, cfg, startdt, 100)
+
+tomorrow = startdt + timedelta(days=1)
+df0 = dfdict[startdt.strftime("%y%m%d")]
+df1 = dfdict[tomorrow.strftime("%y%m%d")]
+
+df00 = df0.filter(df0.uid.isin(df1.uid))
+df01 = df0.filter(~df0.uid.isin(df1.uid))
+
+print(countGames(dfUserGames, df00).show())
+print(countGames(dfUserGames, df01).show())
 
 spark.stop()
