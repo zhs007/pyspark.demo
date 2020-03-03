@@ -469,8 +469,9 @@ tomorrow = startdt + timedelta(days=1)
 df0 = dfdict[startdt.strftime("%y%m%d")]
 df1 = dfdict[tomorrow.strftime("%y%m%d")]
 
-df00 = df0.filter(df0.uid.isin(df1.uid))
-df01 = df0.filter(~df0.uid.isin(df1.uid))
+df1arr = [int(row.uid) for row in df1.collect()]
+df00 = df0.filter(df0.uid.isin(df1arr))
+df01 = df0.filter(~df0.uid.isin(df1arr))
 
 print(countGames(dfUserGames, df00).show())
 print(countGames(dfUserGames, df01).show())
