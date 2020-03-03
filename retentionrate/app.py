@@ -383,7 +383,7 @@ def loadUserGames(ctx, cfg, daytime, mintimes):
 
     print("loadUserGames ", df1.printSchema())
 
-    return df1.filter('count > 100').cache()
+    return df1.filter('count < 100').cache()
 
 
 def countGames(dfUserGames, dfUsers):
