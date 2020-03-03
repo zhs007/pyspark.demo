@@ -413,7 +413,7 @@ ctx = SQLContext(spark.sparkContext)
 accountdf = loadAccount(ctx, cfg)
 
 startdt = datetime(2020, 1, 1)
-enddt = datetime(2020, 1, 2)
+enddt = datetime(2020, 1, 3)
 
 dts = startdt
 dayoff = 0
